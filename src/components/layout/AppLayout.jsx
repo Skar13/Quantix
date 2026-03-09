@@ -20,6 +20,7 @@ const NAV = [
   { section:'Admin', items:[
     { to:'/users',     icon:'👥', label:'Sub-Users',     badge:'4' },
     { to:'/plans',     icon:'⭐', label:'Plans' },
+    { to:'/projects',  icon:'📁', label:'Projects' },
   ]},
 ]
 export default function AppLayout() {
