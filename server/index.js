@@ -19,6 +19,14 @@ app.use('/api/reports',   reportsRouter)
 app.use('/api/materials', materialsRouter)
 app.use('/api/users',     usersRouter)
 app.get('/api/health', (req, res) => res.json({ status:'ok', app:'Online CBS API', time:new Date().toISOString() }))
+app.get('/api/seed', async (req, res) => {
+  try {
+    const seed = require('./db/seed')
+    res.json({ success: true, message: 'Database seeded!' })
+  } catch(err) {
+    res.status(500).json({ error: err.message })
+  }
+})
 const distPath = path.join(__dirname, '../dist')
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath))
