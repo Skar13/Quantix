@@ -7,6 +7,7 @@ import Dashboard from '@/pages/Dashboard'
 import MasterBOQ from '@/pages/MasterBOQ'
 import BillingEntry from '@/pages/BillingEntry'
 import { Reports, Materials, Advances, Variation, BBS, Users, Plans } from '@/pages/OtherPages'
+import Projects from '@/pages/Projects'
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuthStore()
   return isAuthenticated ? children : <Navigate to="/login" replace />
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="bbs" element={<BBS />} />
         <Route path="users" element={<Users />} />
         <Route path="plans" element={<Plans />} />
+        <Route path="projects" element={<Projects />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
