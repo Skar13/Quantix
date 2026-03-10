@@ -23,7 +23,8 @@
 body { background: var(--bg); color: var(--text); font-family: var(--font-sans); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
-input, select, textarea { font-family: var(--font-sans); font-size: 13px; color: var(--text); }
+input, select, textarea { font-family: var(--font-sans); font-size: 13px; color: var(--text); background: transparent; }
+input::placeholder { color: var(--text3); }
 input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
 select option { background: var(--surface2); }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
