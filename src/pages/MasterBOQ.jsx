@@ -1,29 +1,95 @@
 import React, { useState } from 'react'
-import { useBOQStore } from '@/store'
-import { Card, Button, Badge, Modal, PageHeader } from '@/components/ui'
+import { useBOQStore, useProjectStore } from '@/store'
+import { Card, Button, Badge, Modal, Input, Select, PageHeader } from '@/components/ui'
 import { formatINR, getVariation } from '@/utils/formula'
 import toast from 'react-hot-toast'
+
 export default function MasterBOQ() {
-  const { parts, items, addItem, deleteItem } = useBOQStore()
+  const { getPartsForProject, getItemsForProject, addItem, addPart, deleteItem } = useBOQStore()
+  const { activeProjectId, getActiveProject } = useProjectStore()
+  const project = getActiveProject()
+
+  const parts = getPartsForProject(activeProjectId)
+  const items = getItemsForProject(activeProjectId)
+
   const [search, setSearch] = useState('')
   const [importModal, setImportModal] = useState(false)
-  const [addModal, setAddModal] = useState(false)
+  const [addItemModal, setAddItemModal] = useState(false)
+  const [addPartModal, setAddPartModal] = useState(false)
   const [newItem, setNewItem] = useState({ partId:'', no:'', description:'', unit:'', boqQty:'', rate:'' })
+  const [newPart, setNewPart] = useState({ name:'', description:'' })
+
   const filtered = items.filter(i => !search || i.description.toLowerCase().includes(search.toLowerCase()) || i.no.toLowerCase().includes(search.toLowerCase()))
   const totalBOQ    = items.reduce((s,i) => s + i.boqQty * i.rate, 0)
   const totalBilled = items.reduce((s,i) => s + i.billedQty * i.rate, 0)
-  function handleAdd() {
+
+  function handleAddItem() {
     if (!newItem.no || !newItem.description) { toast.error('Item No. and description required'); return }
-    addItem({ ...newItem, boqQty: parseFloat(newItem.boqQty)||0, rate: parseFloat(newItem.rate)||0, billedQty:0 })
-    toast.success('Item added'); setAddModal(false)
+    if (!newItem.partId) { toast.error('Please select a part'); return }
+    addItem({ ...newItem, boqQty: parseFloat(newItem.boqQty)||0, rate: parseFloat(newItem.rate)||0, billedQty:0 }, activeProjectId)
+    toast.success('Item added!')
+    setAddItemModal(false)
     setNewItem({ partId:'', no:'', description:'', unit:'', boqQty:'', rate:'' })
   }
+
+  function handleAddPart() {
+    if (!newPart.name) { toast.error('Part name required'); return }
+    addPart({ ...newPart }, activeProjectId)
+    toast.success('Part added!')
+    setAddPartModal(false)
+    setNewPart({ name:'', description:'' })
+  }
+
+  // Empty state
+  if (parts.length === 0) {
+    return (
+      <div>
+        <PageHeader title="Master BOQ" subtitle={project?.name || 'No project selected'}
+          actions={<Button variant="gold" onClick={() => setAddPartModal(true)}>+ Add Part</Button>}
+        />
+        <div style={{ padding:'0 28px 28px' }}>
+          <div style={{ textAlign:'center', padding:'80px 24px', background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12 }}>
+            <div style={{ fontSize:48, marginBottom:16 }}>📋</div>
+            <div style={{ fontFamily:'var(--font-display)', fontSize:20, fontWeight:700, marginBottom:8 }}>No BOQ items yet</div>
+            <div style={{ fontSize:13, color:'var(--text2)', marginBottom:24 }}>Start by adding parts and items or import from Excel</div>
+            <div style={{ display:'flex', gap:10, justifyContent:'center', flexWrap:'wrap' }}>
+              <Button variant="gold" onClick={() => setAddPartModal(true)}>+ Add Part</Button>
+              <Button variant="outline" onClick={() => setImportModal(true)}>⬆ Import Excel</Button>
+            </div>
+          </div>
+        </div>
+        <Modal open={addPartModal} onClose={() => setAddPartModal(false)} title="Add BOQ Part">
+          <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+            <Input label="Part Name *" value={newPart.name} onChange={e => setNewPart(p=>({...p,name:e.target.value}))} placeholder="e.g. Part A" />
+            <Input label="Description" value={newPart.description} onChange={e => setNewPart(p=>({...p,description:e.target.value}))} placeholder="e.g. Earthwork" />
+          </div>
+          <div style={{ display:'flex', justifyContent:'flex-end', gap:8, marginTop:16 }}>
+            <Button variant="ghost" onClick={() => setAddPartModal(false)}>Cancel</Button>
+            <Button variant="gold" onClick={handleAddPart}>Add Part</Button>
+          </div>
+        </Modal>
+        <Modal open={importModal} onClose={() => setImportModal(false)} title="Import Master BOQ" subtitle="Upload Excel work order file">
+          <div style={{ border:'2px dashed var(--border2)', borderRadius:10, padding:32, textAlign:'center', cursor:'pointer', marginBottom:14 }}>
+            <div style={{ fontSize:36, marginBottom:10 }}>📂</div>
+            <div style={{ fontWeight:600, marginBottom:4 }}>Click to upload or drag & drop</div>
+            <div style={{ fontSize:11, color:'var(--text3)' }}>Supports .xlsx, .xls</div>
+          </div>
+          <div style={{ display:'flex', justifyContent:'flex-end', gap:8 }}>
+            <Button variant="ghost" onClick={() => setImportModal(false)}>Cancel</Button>
+            <Button variant="gold" onClick={() => { setImportModal(false); toast.success('Import feature coming soon!') }}>Import →</Button>
+          </div>
+        </Modal>
+      </div>
+    )
+  }
+
   return (
     <div>
-      <PageHeader title="Master BOQ" subtitle="Bill of Quantities — Contract baseline"
+      <PageHeader title="Master BOQ" subtitle={project?.name || 'Bill of Quantities'}
         actions={<>
           <Button variant="gold" onClick={() => setImportModal(true)}>⬆ Import Excel</Button>
-          <Button variant="outline" onClick={() => setAddModal(true)}>+ Add Item</Button>
+          <Button variant="outline" onClick={() => setAddPartModal(true)}>+ Add Part</Button>
+          <Button variant="outline" onClick={() => setAddItemModal(true)}>+ Add Item</Button>
         </>}
       />
       <div style={{ padding:'0 28px 28px' }}>
@@ -35,7 +101,9 @@ export default function MasterBOQ() {
             </div>
           ))}
         </div>
+
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Search items..." style={{ width:'100%', maxWidth:400, background:'var(--surface3)', border:'1px solid var(--border)', borderRadius:6, padding:'8px 12px', color:'var(--text)', fontSize:12, outline:'none', marginBottom:12 }} />
+
         <Card>
           <div style={{ overflowX:'auto' }}>
             <table style={{ width:'100%', borderCollapse:'collapse', minWidth:800 }}>
@@ -55,6 +123,9 @@ export default function MasterBOQ() {
                       <tr style={{ background:'rgba(240,165,0,0.04)' }}>
                         <td colSpan={9} style={{ padding:'9px 10px', fontFamily:'var(--font-display)', fontWeight:700, color:'var(--accent)', fontSize:12, borderBottom:'1px solid var(--border)' }}>{part.name} — {part.description}</td>
                       </tr>
+                      {pi.length === 0 && (
+                        <tr><td colSpan={9} style={{ padding:'12px', textAlign:'center', color:'var(--text3)', fontSize:11 }}>No items in this part yet. <span onClick={() => { setNewItem(p=>({...p,partId:part.id})); setAddItemModal(true) }} style={{ color:'var(--accent)', cursor:'pointer' }}>+ Add item</span></td></tr>
+                      )}
                       {pi.map(item => {
                         const amt = item.boqQty * item.rate
                         const pct = item.boqQty > 0 ? (item.billedQty/item.boqQty)*100 : 0
@@ -81,50 +152,55 @@ export default function MasterBOQ() {
           </div>
         </Card>
       </div>
+
+      {/* Add Part Modal */}
+      <Modal open={addPartModal} onClose={() => setAddPartModal(false)} title="Add BOQ Part">
+        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+          <Input label="Part Name *" value={newPart.name} onChange={e => setNewPart(p=>({...p,name:e.target.value}))} placeholder="e.g. Part A" />
+          <Input label="Description" value={newPart.description} onChange={e => setNewPart(p=>({...p,description:e.target.value}))} placeholder="e.g. Earthwork" />
+        </div>
+        <div style={{ display:'flex', justifyContent:'flex-end', gap:8, marginTop:16 }}>
+          <Button variant="ghost" onClick={() => setAddPartModal(false)}>Cancel</Button>
+          <Button variant="gold" onClick={handleAddPart}>Add Part</Button>
+        </div>
+      </Modal>
+
+      {/* Add Item Modal */}
+      <Modal open={addItemModal} onClose={() => setAddItemModal(false)} title="Add BOQ Item">
+        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+          <div>
+            <label style={{ display:'block', fontSize:10, color:'var(--text3)', textTransform:'uppercase', marginBottom:5 }}>Part *</label>
+            <select value={newItem.partId} onChange={e => setNewItem(p=>({...p,partId:e.target.value}))} style={{ width:'100%', background:'var(--surface3)', border:'1px solid var(--border)', borderRadius:6, padding:'7px 10px', color:'var(--text)', fontSize:12, outline:'none' }}>
+              <option value="">Select part...</option>
+              {parts.map(p => <option key={p.id} value={p.id}>{p.name} — {p.description}</option>)}
+            </select>
+          </div>
+          <Input label="Item No. *" value={newItem.no} onChange={e => setNewItem(p=>({...p,no:e.target.value}))} placeholder="e.g. A-1" />
+          <Input label="Description *" value={newItem.description} onChange={e => setNewItem(p=>({...p,description:e.target.value}))} placeholder="Full item description" />
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10 }}>
+            <Input label="Unit" value={newItem.unit} onChange={e => setNewItem(p=>({...p,unit:e.target.value}))} placeholder="m³" />
+            <Input label="BOQ Qty" type="number" value={newItem.boqQty} onChange={e => setNewItem(p=>({...p,boqQty:e.target.value}))} placeholder="0" />
+            <Input label="Rate (₹)" type="number" value={newItem.rate} onChange={e => setNewItem(p=>({...p,rate:e.target.value}))} placeholder="0" />
+          </div>
+        </div>
+        <div style={{ display:'flex', justifyContent:'flex-end', gap:8, marginTop:16 }}>
+          <Button variant="ghost" onClick={() => setAddItemModal(false)}>Cancel</Button>
+          <Button variant="gold" onClick={handleAddItem}>Add Item</Button>
+        </div>
+      </Modal>
+
+      {/* Import Modal */}
       <Modal open={importModal} onClose={() => setImportModal(false)} title="Import Master BOQ" subtitle="Upload Excel work order file">
-        <div style={{ border:'2px dashed var(--border2)', borderRadius:10, padding:32, textAlign:'center', cursor:'pointer', marginBottom:14 }} onClick={() => toast('Connect to backend for real import')}>
+        <div style={{ border:'2px dashed var(--border2)', borderRadius:10, padding:32, textAlign:'center', cursor:'pointer', marginBottom:14 }}>
           <div style={{ fontSize:36, marginBottom:10 }}>📂</div>
           <div style={{ fontWeight:600, marginBottom:4 }}>Click to upload or drag & drop</div>
           <div style={{ fontSize:11, color:'var(--text3)' }}>Supports .xlsx, .xls</div>
         </div>
         <div style={{ display:'flex', justifyContent:'flex-end', gap:8 }}>
           <Button variant="ghost" onClick={() => setImportModal(false)}>Cancel</Button>
-          <Button variant="gold" onClick={() => { setImportModal(false); toast.success('Imported!') }}>Import →</Button>
-        </div>
-      </Modal>
-      <Modal open={addModal} onClose={() => setAddModal(false)} title="Add BOQ Item">
-        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-            <div>
-              <label style={{ display:'block', fontSize:10, color:'var(--text3)', textTransform:'uppercase', marginBottom:5 }}>Part</label>
-              <select value={newItem.partId} onChange={e => setNewItem(p=>({...p,partId:e.target.value}))} style={{ width:'100%', background:'var(--surface3)', border:'1px solid var(--border)', borderRadius:6, padding:'7px 10px', color:'var(--text)', fontSize:12, outline:'none' }}>
-                <option value="">Select...</option>
-                {parts.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={{ display:'block', fontSize:10, color:'var(--text3)', textTransform:'uppercase', marginBottom:5 }}>Item No.</label>
-              <input value={newItem.no} onChange={e => setNewItem(p=>({...p,no:e.target.value}))} placeholder="e.g. B-5" style={{ width:'100%', background:'var(--surface3)', border:'1px solid var(--border)', borderRadius:6, padding:'7px 10px', color:'var(--text)', fontSize:12, outline:'none' }} />
-            </div>
-          </div>
-          <div>
-            <label style={{ display:'block', fontSize:10, color:'var(--text3)', textTransform:'uppercase', marginBottom:5 }}>Description</label>
-            <input value={newItem.description} onChange={e => setNewItem(p=>({...p,description:e.target.value}))} placeholder="Full item description" style={{ width:'100%', background:'var(--surface3)', border:'1px solid var(--border)', borderRadius:6, padding:'7px 10px', color:'var(--text)', fontSize:12, outline:'none' }} />
-          </div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10 }}>
-            {[['Unit','unit','m³'],['BOQ Qty','boqQty','0'],['Rate (₹)','rate','0']].map(([label,key,ph]) => (
-              <div key={key}>
-                <label style={{ display:'block', fontSize:10, color:'var(--text3)', textTransform:'uppercase', marginBottom:5 }}>{label}</label>
-                <input value={newItem[key]} onChange={e => setNewItem(p=>({...p,[key]:e.target.value}))} placeholder={ph} style={{ width:'100%', background:'var(--surface3)', border:'1px solid var(--border)', borderRadius:6, padding:'7px 10px', color:'var(--text)', fontSize:12, outline:'none' }} />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div style={{ display:'flex', justifyContent:'flex-end', gap:8, marginTop:16 }}>
-          <Button variant="ghost" onClick={() => setAddModal(false)}>Cancel</Button>
-          <Button variant="gold" onClick={handleAdd}>Add Item</Button>
+          <Button variant="gold" onClick={() => { setImportModal(false); toast.success('Import feature coming soon!') }}>Import →</Button>
         </div>
       </Modal>
     </div>
   )
-}
+                                     }
