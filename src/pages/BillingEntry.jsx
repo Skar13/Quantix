@@ -11,9 +11,9 @@ function FormulaCell({ value, onChange, placeholder }) {
     <div style={{ position:'relative' }}>
       <input value={value||''} onChange={e => onChange(e.target.value)} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} placeholder={placeholder}
         style={{ width:'100%', background:'transparent', border:'none', outline:'none', padding:'7px 8px', fontSize:12, fontFamily:'var(--font-mono)', color:isFormula?'var(--accent)':'var(--text)', textAlign:'right' }} />
-      {isFormula && !focused && result !== null && (
-        <div style={{ position:'absolute', top:'100%', right:4, zIndex:10, background:'var(--surface)', border:'1px solid var(--border)', borderRadius:4, padding:'2px 6px', fontSize:10, fontFamily:'var(--font-mono)', color:'var(--green)', whiteSpace:'nowrap' }}>= {result}</div>
-      )}
+      {isFormula && focused && result !== null && (
+  <div style={{ position:'fixed', zIndex:999, background:'var(--surface2)', border:'1px solid var(--accent)', borderRadius:4, padding:'3px 8px', fontSize:11, fontFamily:'var(--font-mono)', color:'var(--green)', whiteSpace:'nowrap', pointerEvents:'none' }}>= {result}</div>
+)}
     </div>
   )
 }
