@@ -10,6 +10,9 @@ export const useProjectStore = create(persist((set, get) => ({
   activeProjectId: 'p1',
   getActiveProject: () => get().projects.find(p => p.id === get().activeProjectId),
   setActiveProject: (id) => set({ activeProjectId: id }),
+  addProject: (project) => set(s => ({ projects: [...s.projects, { ...project, id: Date.now().toString() }] })),
+  updateProject: (id, data) => set(s => ({ projects: s.projects.map(p => p.id === id ? { ...p, ...data } : p) })),
+  deleteProject: (id) => set(s => ({ projects: s.projects.filter(p => p.id !== id) })),
 }), { name: 'cbs-projects' }))
 export const useBOQStore = create(persist((set, get) => ({
   parts: [
