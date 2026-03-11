@@ -377,7 +377,7 @@ export function Plans() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12, marginBottom: 20 }}>
           {plans.map(plan => (
             <div key={plan.id} onClick={() => setSelected(plan.id)} style={{
-              background: 'var(--surface2)', border: `1px solid ${selected === plan.id ? 'var(--accent)' : 'var(--border)'}`,
+              border: `1px solid ${selected === plan.id ? 'var(--accent)' : 'var(--border)'}`,
               borderRadius: 10, padding: 18, cursor: 'pointer', transition: 'all 0.2s',
               background: selected === plan.id ? 'rgba(240,165,0,0.07)' : 'var(--surface2)'
             }}>
