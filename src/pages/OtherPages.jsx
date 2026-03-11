@@ -317,4 +317,102 @@ export function BBS() {
                 <tr style={{ background:'var(--surface2)' }}>
                   <td colSpan={7} style={{ padding:'9px 12px', textAlign:'right', fontSize:11, color:'var(--text2)' }}>Total</td>
                   <td style={{ padding:'9px 12px', fontFamily:'var(--font-mono)', color:'var(--green)', fontWeight:700, fontSize:14 }}>{total.toFixed(1)} kg</td>
-   
+   </tr>
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+export function Users() {
+  const { subUsers, toggleUser } = useUsersStore()
+  const { getItemsForProject, getPartsForProject } = useBOQStore()
+  const { activeProjectId } = useProjectStore()
+  const items = getItemsForProject(activeProjectId)
+  const parts = getPartsForProject(activeProjectId)
+  const [selectedUser, setSelectedUser] = useState(null)
+  return (
+    <div>
+      <PageHeader title="Sub-User Management" subtitle="Restrict access to specific BOQ items" actions={<Button variant="gold">+ Create Sub-User</Button>} />
+      <div style={{ padding:'0 28px 28px' }}>
+        <Card style={{ marginBottom:16 }}>
+          <CardHeader><CardTitle>Active Sub-Users</CardTitle></CardHeader>
+          {subUsers.map(user => (
+            <div key={user.id} style={{ display:'flex', alignItems:'center', gap:14, padding:'12px 18px', borderBottom:'1px solid var(--border)' }}>
+              <div style={{ width:36, height:36, borderRadius:'50%', background:user.color+'20', color:user.color, border:`1px solid ${user.color}40`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:700, flexShrink:0 }}>
+                {user.name.split(' ').map(w=>w[0]).join('')}
+              </div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:13, fontWeight:500, display:'flex', alignItems:'center', gap:6 }}>{user.name} {user.active && <Badge color="green">● Active</Badge>}</div>
+                <div style={{ fontSize:11, color:'var(--text3)', marginTop:2 }}>{user.role} · {user.assignedItems.length} items</div>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setSelectedUser(user)}>Edit Access</Button>
+              <Toggle checked={user.active} onChange={() => toggleUser(user.id)} />
+            </div>
+          ))}
+        </Card>
+        {selectedUser && (
+          <Card>
+            <CardHeader><CardTitle>Item Access — {selectedUser.name}</CardTitle><Button variant="ghost" size="sm" onClick={() => setSelectedUser(null)}>Close ✕</Button></CardHeader>
+            <div style={{ overflowX:'auto' }}>
+              <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
+                <thead><tr style={{ background:'var(--surface3)' }}>{['✓','Item No.','Description','Part','Access'].map(h => <th key={h} style={{ padding:'7px 12px', textAlign:'left', fontSize:10, fontWeight:600, textTransform:'uppercase', color:'var(--text3)', borderBottom:'1px solid var(--border)' }}>{h}</th>)}</tr></thead>
+                <tbody>
+                  {items.slice(0,8).map(item => (
+                    <tr key={item.id} style={{ borderBottom:'1px solid var(--border)' }}>
+                      <td style={{ padding:'8px 12px', width:40 }}><input type="checkbox" defaultChecked={selectedUser.assignedItems.includes(item.id)} /></td>
+                      <td style={{ padding:'8px 12px', fontFamily:'var(--font-mono)', color:'var(--blue)' }}>{item.no}</td>
+                      <td style={{ padding:'8px 12px', color:'var(--text2)' }}>{item.description.slice(0,45)}</td>
+                      <td style={{ padding:'8px 12px' }}>{parts.find(p=>p.id===item.partId)?.name}</td>
+                      <td style={{ padding:'8px 12px' }}><select style={{ background:'var(--surface3)', border:'1px solid var(--border)', borderRadius:4, padding:'3px 6px', color:'var(--text)', fontSize:11 }}><option>View + Edit</option><option>View Only</option></select></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export function Plans() {
+  const [selected, setSelected] = useState('pro')
+  const [code, setCode] = useState('')
+  const plans = [
+    { id:'basic',      name:'Basic',        price:'Rs.999',   features:['1 Work','2 Sub-users','50 BOQ items','PDF Export'] },
+    { id:'pro',        name:'Professional', price:'Rs.2,499', features:['5 Works','10 Sub-users','Unlimited items','Excel+PDF','Live formulas','BBS'] },
+    { id:'enterprise', name:'Enterprise',   price:'Rs.5,999', features:['Unlimited Works','Unlimited Users','All exports','Custom branding','API Access'] },
+  ]
+  return (
+    <div>
+      <PageHeader title="Subscription Plans" subtitle="Current plan: Professional · Valid till 31 Mar 2026" />
+      <div style={{ padding:'0 28px 28px' }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(200px,1fr))', gap:12, marginBottom:20 }}>
+          {plans.map(plan => (
+            <div key={plan.id} onClick={() => setSelected(plan.id)} style={{ background:selected===plan.id?'rgba(240,165,0,0.07)':'var(--surface2)', border:`1px solid ${selected===plan.id?'var(--accent)':'var(--border)'}`, borderRadius:10, padding:18, cursor:'pointer', transition:'all 0.2s' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
+                <span style={{ fontFamily:'var(--font-display)', fontSize:16, fontWeight:700 }}>{plan.name}</span>
+                {plan.id==='pro' && <Badge color="yellow">Current</Badge>}
+              </div>
+              <div style={{ fontFamily:'var(--font-mono)', fontSize:24, color:'var(--accent)', marginBottom:10 }}>{plan.price}<span style={{ fontSize:12, color:'var(--text3)' }}>/yr</span></div>
+              {plan.features.map(f => <div key={f} style={{ fontSize:11, color:'var(--text2)', marginBottom:3 }}>✓ {f}</div>)}
+              <Button variant={plan.id==='pro'?'gold':'outline'} style={{ marginTop:12, width:'100%' }}>{plan.id==='pro'?'Active Plan':'Select'}</Button>
+            </div>
+          ))}
+        </div>
+        <Card>
+          <CardHeader><CardTitle>Activation Code</CardTitle></CardHeader>
+          <CardBody style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
+            <input value={code} onChange={e => setCode(e.target.value)} placeholder="CBS-XXXX-XXXX-XXXX" style={{ flex:1, maxWidth:320, background:'var(--surface3)', border:'1px solid var(--border)', borderRadius:6, padding:'8px 12px', color:'var(--text)', fontSize:12, outline:'none' }} />
+            <Button variant="gold" onClick={() => code?toast.success('Plan activated!'):toast.error('Enter a code first')}>Activate</Button>
+          </CardBody>
+        </Card>
+      </div>
+    </div>
+  )
+}
