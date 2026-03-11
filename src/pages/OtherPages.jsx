@@ -1,80 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quantix — Code Updates</title>
-<style>
-  :root {
-    --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
-    --border: #30363d; --accent: #f0a500; --green: #3fb950;
-    --text: #e6edf3; --text2: #8b949e; --text3: #6e7681;
-    --red: #f85149; --blue: #58a6ff;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; padding: 20px; }
-  h1 { font-size: 24px; color: var(--accent); margin-bottom: 6px; }
-  .subtitle { color: var(--text2); font-size: 13px; margin-bottom: 24px; }
-  .file-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
-  .file-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
-  .file-path { font-family: monospace; font-size: 13px; color: var(--blue); }
-  .file-desc { font-size: 11px; color: var(--text3); margin-top: 2px; }
-  .copy-btn {
-    background: var(--accent); color: #000; border: none; border-radius: 6px;
-    padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
-    transition: opacity 0.2s; white-space: nowrap; flex-shrink: 0;
-  }
-  .copy-btn:hover { opacity: 0.85; }
-  .copy-btn.copied { background: var(--green); color: #fff; }
-  pre {
-    padding: 16px; overflow-x: auto; font-size: 11px; line-height: 1.6;
-    font-family: 'Courier New', monospace; color: var(--text2);
-    max-height: 400px; overflow-y: auto;
-  }
-  pre::-webkit-scrollbar { width: 4px; height: 4px; }
-  pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; margin-left: 8px; }
-  .badge-update { background: rgba(240,165,0,0.15); color: var(--accent); }
-  .badge-new { background: rgba(63,185,80,0.15); color: var(--green); }
-  .steps { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; }
-  .steps h3 { color: var(--accent); font-size: 14px; margin-bottom: 10px; }
-  .step { display: flex; gap: 10px; margin-bottom: 8px; font-size: 13px; color: var(--text2); align-items: flex-start; }
-  .step-num { background: var(--accent); color: #000; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
-  .nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-  .nav-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
-  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
-</style>
-</head>
-<body>
-
-<h1>🏗️ Quantix — Code Updates</h1>
-<p class="subtitle">All files that need to be updated on GitHub. Click Copy → Paste on GitHub → Commit.</p>
-
-<div class="steps">
-  <h3>📋 How to use this</h3>
-  <div class="step"><div class="step-num">1</div><span>Click <strong>Copy</strong> button on any file below</span></div>
-  <div class="step"><div class="step-num">2</div><span>Go to <strong>github.com/Skar13/Quantix</strong></span></div>
-  <div class="step"><div class="step-num">3</div><span>Navigate to the file path shown, click pencil ✏️ icon</span></div>
-  <div class="step"><div class="step-num">4</div><span>Select All → Delete → Paste → Commit to master</span></div>
-</div>
-
-<div class="nav">
-  <button class="nav-btn" onclick="scrollTo('otherPages')">OtherPages.jsx</button>
-  <button class="nav-btn" onclick="scrollTo('billingEntry')">BillingEntry.jsx</button>
-  <button class="nav-btn" onclick="scrollTo('dashboard')">Dashboard.jsx</button>
-  <button class="nav-btn" onclick="scrollTo('masterBOQ')">MasterBOQ.jsx</button>
-  <button class="nav-btn" onclick="scrollTo('appLayout')">AppLayout.jsx</button>
-</div>
-
-<div id="otherPages" class="file-card">
-  <div class="file-header">
-    <div>
-      <div class="file-path">src/pages/OtherPages.jsx <span class="badge badge-update">UPDATE</span></div>
-      <div class="file-desc">Reports page — connect Excel & PDF export buttons</div>
-    </div>
-    <button class="copy-btn" onclick="copyCode(this, 'code-otherPages')">📋 Copy</button>
-  </div>
-  <pre id="code-otherPages">import React, { useState } from 'react'
+import React, { useState } from 'react'
 import { useBOQStore, useMaterialsStore, useUsersStore, useProjectStore, useBillingStore } from '@/store'
 import { Card, CardHeader, CardTitle, CardBody, Badge, Button, Toggle, PageHeader, StatCard, Modal } from '@/components/ui'
 import { formatINR, getVariation } from '@/utils/formula'
@@ -173,7 +97,6 @@ export function Reports() {
             </div>
           ))}
         </div>
-
         <Card>
           <CardHeader><CardTitle>Export Settings</CardTitle></CardHeader>
           <CardBody>
@@ -325,7 +248,7 @@ export function Variation() {
       />
       <div style={{ padding:'0 28px 28px' }}>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(150px,1fr))', gap:10, marginBottom:20 }}>
-          <StatCard label="Items Over BOQ"    value={variations.length} accent="red" />
+          <StatCard label="Items Over BOQ"     value={variations.length} accent="red" />
           <StatCard label="Total Excess Value" value={formatINR(variations.reduce((s,i)=>s+(i.billedQty-i.boqQty)*i.rate,0))} accent="red" />
         </div>
         <Card>
@@ -333,4 +256,65 @@ export function Variation() {
             <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
               <thead><tr style={{ background:'var(--surface3)' }}>{['Item','Description','Unit','BOQ Qty','Billed','Excess','Rate','Excess Value','% Var'].map(h => <th key={h} style={{ padding:'7px 12px', textAlign:'left', fontSize:10, fontWeight:600, textTransform:'uppercase', color:'var(--text3)', borderBottom:'1px solid var(--border)' }}>{h}</th>)}</tr></thead>
               <tbody>
-                {variations.length === 0 && <tr><td colSpan={9} style={{ pad
+                {variations.length === 0 && <tr><td colSpan={9} style={{ padding:'24px', textAlign:'center', color:'var(--text3)' }}>No variations found ✅</td></tr>}
+                {variations.map(item => {
+                  const excess = item.billedQty - item.boqQty
+                  const v = getVariation(item.boqQty, item.billedQty)
+                  return (
+                    <tr key={item.id} style={{ borderBottom:'1px solid var(--border)' }}>
+                      <td style={{ padding:'9px 12px', fontFamily:'var(--font-mono)', color:'var(--blue)' }}>{item.no}</td>
+                      <td style={{ padding:'9px 12px', maxWidth:240 }}>{item.description}</td>
+                      <td style={{ padding:'9px 12px', color:'var(--text2)' }}>{item.unit}</td>
+                      <td style={{ padding:'9px 12px', fontFamily:'var(--font-mono)' }}>{item.boqQty}</td>
+                      <td style={{ padding:'9px 12px', fontFamily:'var(--font-mono)', color:'var(--red)' }}>{item.billedQty}</td>
+                      <td style={{ padding:'9px 12px', fontFamily:'var(--font-mono)', color:'var(--red)' }}>+{excess.toFixed(2)}</td>
+                      <td style={{ padding:'9px 12px', fontFamily:'var(--font-mono)' }}>{formatINR(item.rate,0)}</td>
+                      <td style={{ padding:'9px 12px', fontFamily:'var(--font-mono)', color:'var(--red)' }}>{formatINR(excess*item.rate)}</td>
+                      <td style={{ padding:'9px 12px' }}><Badge color={v.status==='high'?'red':'yellow'}>+{v.pct}%</Badge></td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+export function BBS() {
+  const bars = [
+    { member:'Bottom Slab', mark:'T1', dia:16, shape:'Straight', A:6000, nos:24, cutLen:6200, weight:234.8 },
+    { member:'Bottom Slab', mark:'T2', dia:12, shape:'Straight', A:4800, nos:32, cutLen:5000, weight:142.1 },
+    { member:'Side Wall',   mark:'W1', dia:16, shape:'L-Shape',  A:3200, nos:48, cutLen:3840, weight:290.9 },
+    { member:'Side Wall',   mark:'W2', dia:10, shape:'U-Stirrup',A:2800, nos:56, cutLen:3440, weight:118.8 },
+    { member:'Top Slab',    mark:'T3', dia:20, shape:'Straight', A:6000, nos:20, cutLen:6200, weight:305.8 },
+  ]
+  const total = bars.reduce((s,b) => s+b.weight, 0)
+  return (
+    <div>
+      <PageHeader title="Bar Bending Schedule" subtitle="Reinforcement steel summary" actions={<Button variant="gold">⬇ Export BBS</Button>} />
+      <div style={{ padding:'0 28px 28px' }}>
+        <Card>
+          <CardHeader><CardTitle>BBS — Box Culvert CH 3+420</CardTitle><span style={{ fontFamily:'var(--font-mono)', color:'var(--green)' }}>{total.toFixed(1)} kg total</span></CardHeader>
+          <div style={{ overflowX:'auto' }}>
+            <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
+              <thead><tr style={{ background:'var(--surface3)' }}>{['Member','Mark','Dia','Shape','A(mm)','Nos.','Cut Len','Weight(kg)'].map(h => <th key={h} style={{ padding:'7px 12px', textAlign:'left', fontSize:10, fontWeight:600, textTransform:'uppercase', color:'var(--text3)', borderBottom:'1px solid var(--border)' }}>{h}</th>)}</tr></thead>
+              <tbody>
+                {bars.map((b,i) => (
+                  <tr key={i} style={{ borderBottom:'1px solid var(--border)' }}>
+                    <td style={{ padding:'9px 12px' }}>{b.member}</td>
+                    <td style={{ padding:'9px 12px', fontFamily:'var(--font-mono)', color:'var(--blue)' }}>{b.mark}</td>
+                    <td style={{ padding:'9px 12px', fontFamily:'var(--font-mono)' }}>{b.dia}</td>
+                    <td style={{ padding:'9px 12px', color:'var(--text2)' }}>{b.shape}</td>
+                    <td style={{ padding:'9px 12px', fontFamily:'var(--font-mono)' }}>{b.A.toLocaleString()}</td>
+                    <td style={{ padding:'9px 12px', fontFamily:'var(--font-mono)' }}>{b.nos}</td>
+                    <td style={{ padding:'9px 12px', fontFamily:'var(--font-mono)' }}>{b.cutLen.toLocaleString()}</td>
+                    <td style={{ padding:'9px 12px', fontFamily:'var(--font-mono)', color:'var(--green)', fontWeight:600 }}>{b.weight}</td>
+                  </tr>
+                ))}
+                <tr style={{ background:'var(--surface2)' }}>
+                  <td colSpan={7} style={{ padding:'9px 12px', textAlign:'right', fontSize:11, color:'var(--text2)' }}>Total</td>
+                  <td style={{ padding:'9px 12px', fontFamily:'var(--font-mono)', color:'var(--green)', fontWeight:700, fontSize:14 }}>{total.toFixed(1)} kg</td>
+   
