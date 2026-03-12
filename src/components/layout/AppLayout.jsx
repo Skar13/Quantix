@@ -1,70 +1,108 @@
-import React, { useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { clsx } from 'clsx'
-import { useAuthStore, useProjectStore } from '@/store'
+import React, { useEffect } from 'react'
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuthStore, useProjectStore, useBOQStore, useBillingStore } from '@/store'
 import { Button } from '@/components/ui'
-import toast from 'react-hot-toast'
-const NAV = [
-  { section:'Main', items:[
-    { to:'/',          icon:'⬛', label:'Dashboard' },
-    { to:'/boq',       icon:'📋', label:'Master BOQ',    badge:'12' },
-    { to:'/billing',   icon:'📝', label:'Billing Entry', dot:true },
-    { to:'/materials', icon:'🧱', label:'Materials' },
-    { to:'/advances',  icon:'💰', label:'Advances' },
-  ]},
-  { section:'Reports', items:[
-    { to:'/reports',   icon:'📊', label:'All Reports' },
-    { to:'/variation', icon:'📈', label:'Variations',    badge:'2' },
-    { to:'/bbs',       icon:'🔩', label:'BBS' },
-  ]},
-  { section:'Admin', items:[
-    { to:'/users',     icon:'👥', label:'Sub-Users',     badge:'4' },
-    { to:'/plans',     icon:'⭐', label:'Plans' },
-    { to:'/projects',  icon:'📁', label:'Projects' },
-  ]},
+
+const NAV_ITEMS = [
+  { path: '/', icon: '🎛️', label: 'Dashboard' },
+  { path: '/boq', icon: '📋', label: 'Master BOQ' },
+  { path: '/billing', icon: '📝', label: 'Billing Entry' },
+  { path: '/materials', icon: '🧱', label: 'Materials' },
+  { path: '/advances', icon: '💰', label: 'Advances' },
+  { path: '/reports', icon: '📊', label: 'Reports' },
+  { path: '/users', icon: '👥', label: 'Users' },
+  { path: '/plans', icon: '⭐', label: 'Plans' },
 ]
-export default function AppLayout() {
-  const [collapsed, setCollapsed] = useState(false)
-  const { user, logout } = useAuthStore()
-  const { getActiveProject } = useProjectStore()
-  const project = getActiveProject()
+
+export function AppLayout() {
+  const location = useLocation()
   const navigate = useNavigate()
-  const initials = user?.name?.split(' ').map(w=>w[0]).join('') || 'SU'
-  function handleLogout() { logout(); navigate('/login'); toast.success('Logged out') }
+  
+  const { user, logout } = useAuthStore()
+  const { projects, activeProjectId, setActiveProject, fetchProjects } = useProjectStore()
+  const { fetchBOQ } = useBOQStore()
+  const { bills, activeBillId, fetchBills } = useBillingStore()
+
+  // ── THE MAGIC: Initial Data Fetching from Database ──
+  useEffect(() => {
+    fetchProjects()
+  }, [fetchProjects])
+
+  useEffect(() => {
+    if (activeProjectId) {
+      fetchBOQ(activeProjectId)
+      fetchBills(activeProjectId)
+    }
+  }, [activeProjectId, fetchBOQ, fetchBills])
+
+  const activeBill = bills.find(b => b.id === activeBillId)
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
   return (
-    <div style={{ display:'flex', flexDirection:'column', height:'100vh', overflow:'hidden' }}>
-      <header style={{ height:52, background:'var(--surface)', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', padding:'0 16px', gap:12, flexShrink:0, zIndex:100 }}>
-        <button onClick={() => setCollapsed(c=>!c)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text2)', fontSize:16, padding:4 }}>☰</button>
-        <span style={{ fontFamily:'var(--font-display)', fontSize:16, fontWeight:800 }}>Online <span style={{ color:'var(--accent)' }}>CBS</span></span>
-        {project && <div style={{ display:'flex', alignItems:'center', gap:6, background:'var(--surface3)', border:'1px solid var(--border)', borderRadius:6, padding:'4px 10px', fontSize:11, color:'var(--text2)' }}>📁 <strong style={{ color:'var(--text)', fontSize:11 }}>{project.name}</strong></div>}
-        <div style={{ flex:1 }} />
-        <span style={{ background:'rgba(240,165,0,0.15)', border:'1px solid rgba(240,165,0,0.3)', color:'var(--accent)', fontSize:10, fontWeight:600, padding:'3px 8px', borderRadius:20, fontFamily:'var(--font-mono)' }}>RA Bill #7</span>
-        <Button variant="gold" size="sm" onClick={() => navigate('/reports')}>⬇ Export</Button>
-        <div onClick={handleLogout} title="Logout" style={{ width:30, height:30, background:'linear-gradient(135deg, #f0a500, #e07b00)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:'#000', cursor:'pointer' }}>{initials}</div>
-      </header>
-      <div style={{ display:'flex', flex:1, overflow:'hidden' }}>
-        <aside style={{ width:collapsed?52:220, background:'var(--surface)', borderRight:'1px solid var(--border)', display:'flex', flexDirection:'column', flexShrink:0, overflowY:'auto', overflowX:'hidden', transition:'width 0.2s ease' }}>
-          {NAV.map(section => (
-            <div key={section.section} style={{ padding:'12px 10px 6px' }}>
-              {!collapsed && <div style={{ fontSize:9, fontWeight:600, letterSpacing:1, textTransform:'uppercase', color:'var(--text3)', padding:'0 4px', marginBottom:4 }}>{section.section}</div>}
-              {section.items.map(item => (
-                <NavLink key={item.to} to={item.to} end={item.to==='/'} style={({ isActive }) => ({ display:'flex', alignItems:'center', gap:8, padding:'7px 8px', borderRadius:6, cursor:'pointer', fontSize:12, textDecoration:'none', marginBottom:1, color:isActive?'var(--accent)':'var(--text2)', background:isActive?'rgba(240,165,0,0.12)':'transparent', border:isActive?'1px solid rgba(240,165,0,0.2)':'1px solid transparent', justifyContent:collapsed?'center':'flex-start' })}>
-                  <span style={{ fontSize:14, width:18, textAlign:'center', flexShrink:0 }}>{item.icon}</span>
-                  {!collapsed && <span style={{ flex:1 }}>{item.label}</span>}
-                  {!collapsed && item.badge && <span style={{ background:'var(--surface3)', color:'var(--text3)', fontSize:9, padding:'1px 5px', borderRadius:10, fontFamily:'var(--font-mono)' }}>{item.badge}</span>}
-                  {!collapsed && item.dot && <span style={{ width:6, height:6, background:'var(--red)', borderRadius:'50%' }} />}
-                </NavLink>
-              ))}
-            </div>
-          ))}
-          <div style={{ marginTop:'auto', padding:10, borderTop:'1px solid var(--border)' }}>
-            <div onClick={handleLogout} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px', borderRadius:6, cursor:'pointer' }}>
-              <div style={{ width:28, height:28, flexShrink:0, background:'linear-gradient(135deg, #bc8cff, #58a6ff)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:'#fff' }}>{initials}</div>
-              {!collapsed && <div><div style={{ fontSize:11, fontWeight:500 }}>{user?.name||'Admin'}</div><div style={{ fontSize:10, color:'var(--text3)' }}>{user?.role||'Superuser'}</div></div>}
+    <div style={{ display: 'flex', height: '100vh', background: 'var(--background)', color: 'var(--text)', overflow: 'hidden' }}>
+      
+      {/* Sidebar Navigation */}
+      <div style={{ width: 64, background: 'var(--surface2)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 0', gap: 20 }}>
+        {NAV_ITEMS.map(item => (
+          <Link key={item.path} to={item.path} style={{
+            width: 40, height: 40, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, textDecoration: 'none',
+            background: location.pathname === item.path ? 'var(--surface3)' : 'transparent',
+            border: location.pathname === item.path ? '1px solid var(--border)' : '1px solid transparent'
+          }} title={item.label}>
+            {item.icon}
+          </Link>
+        ))}
+      </div>
+
+      {/* Main App Container */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        
+        {/* Top Header */}
+        <header style={{ height: 60, background: 'var(--surface2)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', padding: '0 20px', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ color: 'var(--accent)', fontWeight: 900, fontSize: 18, fontStyle: 'italic', letterSpacing: '-0.5px' }}>
+              Online<br/><span style={{ fontSize: 14 }}>CBS</span>
+            </span>
+          </div>
+
+          {/* Dynamic Project & Bill Header Controls */}
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <select
+              value={activeProjectId || ''}
+              onChange={(e) => setActiveProject(e.target.value)}
+              style={{ background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 10px', color: 'var(--text)', fontSize: 13, cursor: 'pointer', maxWidth: 150 }}
+            >
+              <option value="" disabled>Select Project...</option>
+              {projects.map(p => <option key={p.id} value={p.id}>📁 {p.name}</option>)}
+            </select>
+
+            {/* Dynamic Bill Badge (Replaces RA Bill #7) */}
+            {activeBill ? (
+              <span style={{ background:'rgba(240,165,0,0.15)', border:'1px solid rgba(240,165,0,0.3)', color:'var(--accent)', fontSize:10, fontWeight:600, padding:'3px 8px', borderRadius:20, fontFamily:'var(--font-mono)' }}>
+                RA Bill #{activeBill.billNo}
+              </span>
+            ) : (
+              <span style={{ background:'rgba(139, 148, 158,0.15)', border:'1px solid rgba(139, 148, 158,0.3)', color:'var(--text3)', fontSize:10, fontWeight:600, padding:'3px 8px', borderRadius:20, fontFamily:'var(--font-mono)' }}>
+                No Active Bill
+              </span>
+            )}
+
+            <Button variant="outline" size="sm" onClick={() => window.print()}>↓ Print</Button>
+
+            <div onClick={handleLogout} title="Logout" style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--accent)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+              {user?.name ? user.name.slice(0,2).toUpperCase() : 'AU'}
             </div>
           </div>
-        </aside>
-        <main style={{ flex:1, overflowY:'auto', background:'var(--bg)' }}><Outlet /></main>
+        </header>
+
+        {/* Page Content Viewport */}
+        <main style={{ flex: 1, overflowY: 'auto' }}>
+          <Outlet />
+        </main>
       </div>
     </div>
   )
