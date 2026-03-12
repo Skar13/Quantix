@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   { path: '/plans', icon: '⭐', label: 'Plans' },
 ]
 
-export function AppLayout() {
+export default function AppLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   
