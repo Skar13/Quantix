@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { useBillingStore, useBOQStore, useMaterialsStore, useUsersStore, useProjectStore } from '@/store'
-import { exportBOQToExcel, exportBillToExcel, exportCementStatement } from '@/utils/excelExport'
+import { exportBOQToExcel, exportBillToExcel, exportCementToExcel } from '@/utils/excelExport'
 import { exportBillToPDF, exportBOQToPDF } from '@/utils/pdfExport'
-import { Card, CardHeader, CardTitle, CardBody, Badge, Button, Toggle, PageHeader, StatCard, Modal, EmptyState } from '@/components/ui'
+import { Card, CardHeader, CardTitle, CardBody, Badge, Button, Toggle, PageHeader, StatCard, Modal } from '@/components/ui'
 import { formatINR, getVariation, fmtQty } from '@/utils/formula'
 import toast from 'react-hot-toast'
 
@@ -25,7 +25,7 @@ export function Reports() {
       onExcel: () => toast('Variation Excel — coming in Phase 3'),
       onPDF:   () => toast('Variation PDF — coming in Phase 3') },
     { icon: '🧱', name: 'Cement Consumption',     desc: 'Norm vs actual cement usage reconciliation statement.',
-      onExcel: () => { if(!cementEntries.length) return toast.error('No cement data'); exportCementStatement(cementEntries, PROJECT_NAME); },
+      onExcel: () => { if(!cementEntries.length) return toast.error('No cement data'); exportCementToExcel(cementEntries, PROJECT_NAME); },
       onPDF:   () => toast('Cement PDF — coming in Phase 3') },
     { icon: '🔒', name: 'Part-Rate Withheld',     desc: 'Auto-computed amounts withheld for incomplete items.',
       onExcel: () => toast('Withheld statement — coming in Phase 3'),
