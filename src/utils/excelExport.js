@@ -81,3 +81,4 @@ export function exportCementStatement(entries, projectName) {
   XLSX.utils.book_append_sheet(wb, ws, 'Cement Statement');
   triggerDownload(wb, `Cement_Statement_${projectName?.replace(/\s/g, '_') || 'Export'}.xlsx`);
 }
+export const exportCementToExcel = exportCementStatement;
