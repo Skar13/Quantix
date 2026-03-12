@@ -77,7 +77,7 @@ export default function AppLayout() {
               style={{ background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 10px', color: 'var(--text)', fontSize: 13, cursor: 'pointer', maxWidth: 150 }}
             >
               <option value="" disabled>Select Project...</option>
-              {projects.map(p => <option key={p.id} value={p.id}>📁 {p.name}</option>)}
+              {(projects || []).map(p => <option key={p.id} value={p.id}>📁 {p.name}</option>)}
             </select>
 
             {/* Dynamic Bill Badge (Replaces RA Bill #7) */}
