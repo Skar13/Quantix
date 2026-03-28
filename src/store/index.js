@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { boqAPI, billsAPI, projectsAPI, materialsAPI, usersAPI } from '@/utils/api'
 
-// ── AUTH STORE (Keep Persist for login state) ───────────
+// ── AUTH STORE ───────────────────────────────────────────
 export const useAuthStore = create(
   persist(
     (set) => ({
@@ -12,11 +12,11 @@ export const useAuthStore = create(
       login: (user, token) => set({ user, token, isAuthenticated: true }),
       logout: () => set({ user: null, token: null, isAuthenticated: false }),
     }),
-    { name: 'cbs-auth' }
+    { name: 'quantix-auth' }
   )
 )
 
-// ── PROJECT STORE (Keep Persist for active selection) ───
+// ── PROJECT STORE ────────────────────────────────────────
 export const useProjectStore = create(
   persist(
     (set, get) => ({
@@ -26,7 +26,6 @@ export const useProjectStore = create(
         try {
           const data = await projectsAPI.list()
           set({ projects: data })
-          // Auto-select first project if none is selected
           if (!get().activeProjectId && data.length > 0) {
             set({ activeProjectId: data[0].id })
           }
@@ -38,16 +37,16 @@ export const useProjectStore = create(
       },
       setActiveProject: (id) => set({ activeProjectId: id }),
       addProject: async (projectData) => {
-         const newProject = await projectsAPI.create(projectData)
-         set(s => ({ projects: [newProject, ...s.projects] }))
+        const newProject = await projectsAPI.create(projectData)
+        set(s => ({ projects: [newProject, ...s.projects] }))
       },
     }),
-    { name: 'cbs-projects' }
+    { name: 'quantix-projects' }
   )
 )
 
-// ── BOQ STORE (Removed Persist - Source of truth is DB) ─
-export const useBOQStore = create((set, get) => ({
+// ── BOQ STORE ────────────────────────────────────────────
+export const useBOQStore = create((set) => ({
   parts: [],
   items: [],
   loading: false,
@@ -67,12 +66,11 @@ export const useBOQStore = create((set, get) => ({
       set({ loading: false })
     }
   },
-  // We will keep optimistic UI updates here for snappy UX
   addItem: (item) => set(s => ({ items: [...s.items, item] })),
   deleteItem: (id) => set(s => ({ items: s.items.filter(i => i.id !== id) })),
 }))
 
-// ── BILLING STORE (Removed Persist) ─────────────────────
+// ── BILLING STORE ────────────────────────────────────────
 export const useBillingStore = create((set, get) => ({
   bills: [],
   measurements: [],
@@ -83,7 +81,7 @@ export const useBillingStore = create((set, get) => ({
       const data = await billsAPI.list(projectId)
       set({ bills: data })
       if (data.length > 0 && !get().activeBillId) {
-         set({ activeBillId: data[0].id })
+        set({ activeBillId: data[0].id })
       }
     } catch (err) { console.error('Failed to fetch bills', err) }
   },
@@ -93,7 +91,7 @@ export const useBillingStore = create((set, get) => ({
       const data = await billsAPI.getMeasurements(billId)
       const formatted = data.map(m => ({
         id: m.id, billId: m.bill_id, itemId: m.item_id, partId: m.part_id,
-        zone: m.zone, floor: m.floor_level, member: m.member, no: m.no,
+        zone: m.zone, floor: m.floor_level, member: m.member, no: m.sequence_no,
         length: m.length, width: m.width, depth: m.depth, qty: m.qty, isGroup: m.is_group === 1
       }))
       set({ measurements: formatted })
@@ -102,14 +100,12 @@ export const useBillingStore = create((set, get) => ({
   setActiveBillId: (id) => set({ activeBillId: id }),
 }))
 
-// ── MATERIALS & USERS (Cleared out dummy data) ──────────
+// ── MATERIALS & USERS ────────────────────────────────────
 export const useMaterialsStore = create((set) => ({
   cementEntries: [],
   receipts: [],
-  // Placeholders for future fetch functions
 }))
 
 export const useUsersStore = create((set) => ({
   subUsers: [],
-  // Placeholders for future fetch functions
 }))

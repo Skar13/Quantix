@@ -14,7 +14,7 @@ export default function Dashboard() {
   if (!activeProject) {
     return (
       <div style={{ padding: 40, textAlign: 'center' }}>
-        <h2 style={{ color: 'var(--accent)' }}>Welcome to Online CBS</h2>
+        <h2 style={{ color: 'var(--accent)' }}>Welcome to Quantix</h2>
         <p style={{ color: 'var(--text3)' }}>Please select a project from the top menu or create one in the Projects section to see your data.</p>
       </div>
     )

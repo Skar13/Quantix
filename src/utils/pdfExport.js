@@ -15,7 +15,7 @@ function addHeader(doc, title, projectName) {
   doc.setFillColor(...COLORS.accent);
   doc.rect(0, 0, 4, 28, 'F');
   doc.setFont('helvetica', 'bold').setFontSize(14).setTextColor(...COLORS.accent);
-  doc.text('Online CBS', 10, 10);
+  doc.text('Quantix', 10, 10);
   doc.setFontSize(10).setTextColor(...COLORS.text);
   doc.text(title, 10, 17);
   doc.setFontSize(8).setTextColor(...COLORS.muted);

@@ -9,8 +9,10 @@ import { BillingEntry } from '@/pages/BillingEntry'
 import { Materials, Advances, Reports, Users, Plans, Variation, BBS } from '@/pages/OtherPages'
 
 function PrivateRoute({ children }) {
-  const isAuth = useAuthStore(state => state.isAuthenticated)
-  return isAuth ? children : <Navigate to="/login" />
+  const { isAuthenticated, token } = useAuthStore()
+  // Must have BOTH isAuthenticated AND a valid token
+  if (!isAuthenticated || !token) return <Navigate to="/login" replace />
+  return children
 }
 
 export default function App() {
@@ -29,6 +31,7 @@ export default function App() {
         <Route path="variation" element={<Variation />} />
         <Route path="bbs" element={<BBS />} />
       </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
